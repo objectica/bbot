@@ -1,0 +1,11 @@
+
+If usb device binded by some other process then use next commands
+
+== show full list of usb devices
+lsusb
+
+
+You can rung dmesg to see logs and detectd who locks device
+/sys/bus/usb/drivers/
+== To unbind device
+sudo echo -n 1-7:1.0 | tee -a unbind

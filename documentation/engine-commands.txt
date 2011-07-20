@@ -1,0 +1,7 @@
+
+Command 		Device	Operation  Value
+Move forward		  0-1	    0      0-254
+Move backward		  0-1	    1      0-254
+Free walk		  0-1	    2       any
+Echo on 		  any	    3	     1
+Echo off		  any	    3	    !1

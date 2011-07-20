@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:p="http://www.springframework.org/schema/p" xmlns:jee="http://www.springframework.org/schema/jee"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <bean id="utilPropertyConfiguration" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:/brain.properties</value>
+            </list>
+        </property>
+        <property name="ignoreUnresolvablePlaceholders" value="false"/>
+        <property name="ignoreResourceNotFound" value="false"/>
+    </bean>
+
+    <bean name="brain" class="com.objectica.bbot.BotBrain">
+        <property name="triggers">
+            <list>
+                <bean name="remoteTrigger" class="com.objectica.bbot.triggers.impl.RemoteTrigger">
+                    <property name="sensorCheckInterval" value="10000"/>
+                    <property name="behavior" ref="someBehavior"/>
+                </bean>
+            </list>
+        </property>
+    </bean>
+
+    <bean name="someBehavior" class="com.objectica.bbot.behavior.impl.ConsoleBehavior"/>
+
+
+</beans>
