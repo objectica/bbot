@@ -19,8 +19,12 @@ public class BbotControl extends Activity implements SensorEventListener
     private TextView console;
     private SensorManager manager;
     private Sensor sensor;
-    public static final float[] THRESHOLD = new float[]{1.0f, 1.0f};
-    public static final float[] CEILING = new float[]{10f, 10f};
+
+    public static final float[] X_THRESHOLD = new float[]{-1.0f, 1.0f};
+    public static final float X_CEILING = 10f;
+    public static final float[] Y_THRESHOLD = new float[]{-1.0f, 1.0f};
+    public static final float Y_CEILING = 10f;
+
     private EngineBar leftEngine;
     private EngineBar rightEngine;
     private boolean engineRunning = false;
@@ -61,18 +65,77 @@ public class BbotControl extends Activity implements SensorEventListener
         manager.unregisterListener(this);
     }
 
-    private void updateEngines(float a, float b)
+    private void setEngSpd(float left, float right)
     {
-        if(a > 0 && b < 0)
-        {
+        leftEngine.setValue(left);
+        rightEngine.setValue(right);
+    }
 
+    /**
+     * Updates engine bars
+     *
+     * @param x gyro sensor x coord: must be [-X_CEILING,+X_CEILING]
+     * @param y gyro sensor y coord: must be [-Y_CEILING,+Y_CEILING]
+     */
+    private void updateEngines(float x, float y)
+    {
+        if (x < X_THRESHOLD[0])
+        {
+            if (y > Y_THRESHOLD[1])
+            {
+                //FORWARD_LEFT
+
+            } else if (y < Y_THRESHOLD[0])
+            {
+                //BACKWARD_LEFT
+
+            } else
+            {
+                //ROTATE_LEFT
+                float power = (Math.abs(x) - Math.abs(X_THRESHOLD[0])) / (X_CEILING - Math.abs(X_THRESHOLD[0]));
+                setEngSpd(-leftEngine.getAbsoluteMax() * power, rightEngine.getAbsoluteMax() * power);
+            }
+        } else if (x > X_THRESHOLD[1])
+        {
+            if (y > Y_THRESHOLD[1])
+            {
+                //FORWARD_RIGHT
+            } else if (y < Y_THRESHOLD[0])
+            {
+                //BACKWARD_RIGHT
+            } else
+            {
+                //ROTATE_RIGHT
+                float power = (Math.abs(x) - Math.abs(X_THRESHOLD[1])) / (X_CEILING - Math.abs(X_THRESHOLD[1]));
+                setEngSpd(leftEngine.getAbsoluteMax() * power, -rightEngine.getAbsoluteMax() * power);
+            }
+        } else
+        {
+            if (y > Y_THRESHOLD[1])
+            {
+                //FORWARD
+                float power = (Math.abs(y) - Math.abs(Y_THRESHOLD[1])) / (Y_CEILING - Math.abs(Y_THRESHOLD[1]));
+                setEngSpd(leftEngine.getAbsoluteMax() * power, rightEngine.getAbsoluteMax() * power);
+            } else if (y < Y_THRESHOLD[0])
+            {
+                //BACKWARD
+                float power = (Math.abs(y) - Math.abs(Y_THRESHOLD[0])) / (Y_CEILING - Math.abs(Y_THRESHOLD[0]));
+                setEngSpd(-leftEngine.getAbsoluteMax() * power, -rightEngine.getAbsoluteMax() * power);
+            } else
+            {
+                //CENTER
+                setEngSpd(0f, 0f);
+            }
         }
     }
 
     @Override
     public void onSensorChanged(SensorEvent event)
     {
-        updateEngines(event.values[0],event.values[1]);
+        float x = Math.abs(event.values[0]) > X_CEILING ? Math.signum(event.values[0]) * X_CEILING : event.values[0];
+        // we should invert y to get standard cartesian coord system
+        float y = Math.abs(event.values[1]) > Y_CEILING ? -Math.signum(event.values[1]) * Y_CEILING : -event.values[1];
+        updateEngines(x, y);
         console.setText(new SensorEventDigest(event).toString());
     }
 

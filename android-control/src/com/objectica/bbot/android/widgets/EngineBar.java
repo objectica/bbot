@@ -14,12 +14,12 @@ import android.view.View;
  */
 public class EngineBar extends View
 {
-    public static final float MAX_VALUE = 100f;
     public static final int BG_COLOR = 0xff006600;
     public static final int BR_WIDTH = 20;
     public static final int CTRL_COLOR = 0xffffffff;
     public static final int CTRL_HEIGHT = 10;
 
+    private float absoluteMax = 100f;
 
     private float value = 0f;
 
@@ -31,7 +31,7 @@ public class EngineBar extends View
 
     private int getControlBottom()
     {
-        return (int) ((value + MAX_VALUE) / (2 * MAX_VALUE) * (getHeight() - CTRL_HEIGHT));
+        return (int) ((value + getAbsoluteMax()) / (2 * getAbsoluteMax()) * (getHeight() - CTRL_HEIGHT));
     }
 
 
@@ -40,7 +40,6 @@ public class EngineBar extends View
     {
         canvas.drawColor(BG_COLOR);
         Paint controlPaint = new Paint();
-        controlPaint.setTextSize(12);
         controlPaint.setColor(CTRL_COLOR);
         controlPaint.setStyle(Paint.Style.FILL);
         canvas.drawRect(new Rect(0, getControlBottom(), getWidth(), getControlBottom() + CTRL_HEIGHT), controlPaint);
@@ -59,12 +58,12 @@ public class EngineBar extends View
 
     public void setValue(float value)
     {
-        if (value > MAX_VALUE)
+        if (value > getAbsoluteMax())
         {
-            this.value = MAX_VALUE;
-        } else if (value < -MAX_VALUE)
+            this.value = getAbsoluteMax();
+        } else if (value < -getAbsoluteMax())
         {
-            this.value = -MAX_VALUE;
+            this.value = -getAbsoluteMax();
         } else
         {
             this.value = value;
@@ -72,4 +71,13 @@ public class EngineBar extends View
 
     }
 
+    public float getAbsoluteMax()
+    {
+        return absoluteMax;
+    }
+
+    public void setAbsoluteMax(float absoluteMax)
+    {
+        this.absoluteMax = absoluteMax;
+    }
 }
