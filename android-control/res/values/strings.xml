@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="initial_text">You platfrom doesn\'t support G-sensor</string>    
+    <string name="initial_text">Tap the screen to start engines. If nothing happens then it\'s probably your platform does not support g-sensor.</string>    
 </resources>
