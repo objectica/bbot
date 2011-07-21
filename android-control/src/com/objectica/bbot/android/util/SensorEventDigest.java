@@ -25,12 +25,10 @@ public class SensorEventDigest
         builder.append("Sensor: ").append(event.sensor.getName()).append("\n");
         builder.append("accuracy: ").append(event.accuracy).append("\n");
         builder.append("timestamp: ").append(event.timestamp).append("\n");
-        builder.append("values: [ ");
-        for(float value : event.values)
+        for(int i = 0; i < event.values.length; i ++)
         {
-            builder.append(value).append(" ");
+            builder.append("[").append(i).append("]: ").append(event.values[i]).append("\n");
         }
-        builder.append("]");
         return builder.toString();
     }
 }
