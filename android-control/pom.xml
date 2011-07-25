@@ -5,7 +5,7 @@
     <groupId>com.objectica.bbot</groupId>
     <artifactId>android-client</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <packaging>apk</packaging>
+    <packaging>pom</packaging>
     <name>BBot Android Client</name>
 
     <properties>
@@ -29,7 +29,7 @@
                 <version>2.8.4</version>
                 <configuration>
                     <sdk>
-                        <platform>8</platform>
+                        <platform>10</platform>
                     </sdk>
                     <emulator>
                         <avd>16</avd>
