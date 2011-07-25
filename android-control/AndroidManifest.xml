@@ -11,5 +11,10 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity 
+        android:name=".BbotSettings" 
+        android:screenOrientation="landscape"
+        android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+        />
     </application>
 </manifest>

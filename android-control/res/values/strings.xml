@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="initial_text">Tap the screen to start engines. If nothing happens then it\'s probably your platform does not support g-sensor.</string>    
+    <string name="control_initialText">Tap the screen to start engines. If nothing happens then it\'s probably your platform does not support g-sensor.</string>
+    <string name="settings_title">Settings</string>
+    <string name="settings_bbotHostLabel">Bbot host url:</string>    
+    <string name="settings_saveButtonLabel">Save</string>
+    <string name="menu_settings">Settings</string>
 </resources>
