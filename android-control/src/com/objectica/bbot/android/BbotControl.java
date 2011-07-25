@@ -24,10 +24,11 @@ public class BbotControl extends Activity implements SensorEventListener {
 	private SensorManager manager;
 	private Sensor sensor;
 
-	public static final float[] X_THRESHOLD = new float[] { -1.0f, 1.0f };
-	public static final float X_CEILING = 10f;
-	public static final float[] Y_THRESHOLD = new float[] { -1.0f, 1.0f };
-	public static final float Y_CEILING = 10f;
+	// all floors/ceiling must be > 0
+	private float xFloor = 1.0f;
+	private float yFloor = 1.0f;
+	private float xCeiling = 10f;
+	private float yCeiling = 10f;
 
 	private EngineBar leftEngine;
 	private EngineBar rightEngine;
@@ -53,8 +54,7 @@ public class BbotControl extends Activity implements SensorEventListener {
 			manager.unregisterListener(this);
 		} else {
 			engineRunning = true;
-			manager.registerListener(this, sensor,
-					SensorManager.SENSOR_DELAY_GAME);
+			manager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_GAME);
 		}
 	}
 
@@ -75,7 +75,7 @@ public class BbotControl extends Activity implements SensorEventListener {
 	}
 
 	/**
-	 * Updates engine bars
+	 * Updates engine bars. Whole bunch of crap code to revise later.
 	 * 
 	 * @param x
 	 *            gyro sensor x coord: must be [-X_CEILING,+X_CEILING]
@@ -83,49 +83,69 @@ public class BbotControl extends Activity implements SensorEventListener {
 	 *            gyro sensor y coord: must be [-Y_CEILING,+Y_CEILING]
 	 */
 	private void updateEngines(float x, float y) {
-		if (x < X_THRESHOLD[0]) {
-			if (y > Y_THRESHOLD[1]) {
-				moving = MovementType.FORWARD_LEFT;				
-
-			} else if (y < Y_THRESHOLD[0]) {
-				moving = MovementType.BACKWARD_LEFT;
-
+		if (x < -xFloor) {
+			if (y > yFloor) {
+				if (Math.abs(x) < Math.abs(y)) {
+					moving = MovementType.FORWARD_LEFT;
+					float rPower = getNormY(y) / getMaxY();
+					float lPower = (getNormY(y) - getNormX(x)) * rPower / getNormY(y);
+					setEngSpd(lPower * leftEngine.getAbsoluteMax(), rPower * rightEngine.getAbsoluteMax());
+				} else {
+					moving = MovementType.IDLE;
+					setEngSpd(0f, 0f);
+				}
+			} else if (y < -yFloor) {
+				if (Math.abs(x) < Math.abs(y)) {
+					moving = MovementType.BACKWARD_LEFT;
+					float rPower = getNormY(y) / getMaxY();
+					float lPower = (getNormY(y) - getNormX(x)) * rPower / getNormY(y);
+					setEngSpd(-lPower * leftEngine.getAbsoluteMax(), -rPower * rightEngine.getAbsoluteMax());
+				} else {
+					moving = MovementType.IDLE;
+					setEngSpd(0f, 0f);
+				}
 			} else {
 				moving = MovementType.ROTATE_LEFT;
-				float power = (Math.abs(x) - Math.abs(X_THRESHOLD[0]))
-						/ (X_CEILING - Math.abs(X_THRESHOLD[0]));
-				setEngSpd(-leftEngine.getAbsoluteMax() * power, rightEngine
-						.getAbsoluteMax()
-						* power);
+				float power = getNormX(x) / getMaxX();
+				setEngSpd(-leftEngine.getAbsoluteMax() * power, rightEngine.getAbsoluteMax() * power);
 			}
-		} else if (x > X_THRESHOLD[1]) {
-			if (y > Y_THRESHOLD[1]) {
-				moving = MovementType.FORWARD_RIGHT;
-			} else if (y < Y_THRESHOLD[0]) {
-				moving = MovementType.BACKWARD_RIGHT;
+		} else if (x > xFloor) {
+			if (y > yFloor) {
+				if (Math.abs(x) < Math.abs(y)) {
+					moving = MovementType.FORWARD_RIGHT;
+					float lPower = getNormY(y) / getMaxY();
+					float rPower = (getNormY(y) - getNormX(x)) * lPower / getNormY(y);
+					setEngSpd(lPower * leftEngine.getAbsoluteMax(), rPower * rightEngine.getAbsoluteMax());
+
+				} else {
+					moving = MovementType.IDLE;
+					setEngSpd(0f, 0f);
+				}
+			} else if (y < -yFloor) {
+				if (Math.abs(x) < Math.abs(y)) {
+					moving = MovementType.BACKWARD_RIGHT;
+					float lPower = getNormY(y) / getMaxY();
+					float rPower = (getNormY(y) - getNormX(x)) * lPower / getNormY(y);
+					setEngSpd(-lPower * leftEngine.getAbsoluteMax(), -rPower * rightEngine.getAbsoluteMax());
+
+				} else {
+					moving = MovementType.IDLE;
+					setEngSpd(0f, 0f);
+				}
 			} else {
 				moving = MovementType.ROTATE_RIGHT;
-				float power = (Math.abs(x) - Math.abs(X_THRESHOLD[1]))
-						/ (X_CEILING - Math.abs(X_THRESHOLD[1]));
-				setEngSpd(leftEngine.getAbsoluteMax() * power, -rightEngine
-						.getAbsoluteMax()
-						* power);
+				float power = getNormX(x) / getMaxX();
+				setEngSpd(leftEngine.getAbsoluteMax() * power, -rightEngine.getAbsoluteMax() * power);
 			}
 		} else {
-			if (y > Y_THRESHOLD[1]) {
+			if (y > yFloor) {
 				moving = MovementType.FORWARD;
-				float power = (Math.abs(y) - Math.abs(Y_THRESHOLD[1]))
-						/ (Y_CEILING - Math.abs(Y_THRESHOLD[1]));
-				setEngSpd(leftEngine.getAbsoluteMax() * power, rightEngine
-						.getAbsoluteMax()
-						* power);
-			} else if (y < Y_THRESHOLD[0]) {
+				float power = getNormY(y) / getMaxY();
+				setEngSpd(leftEngine.getAbsoluteMax() * power, rightEngine.getAbsoluteMax() * power);
+			} else if (y < -yFloor) {
 				moving = MovementType.BACKWARD;
-				float power = (Math.abs(y) - Math.abs(Y_THRESHOLD[0]))
-						/ (Y_CEILING - Math.abs(Y_THRESHOLD[0]));
-				setEngSpd(-leftEngine.getAbsoluteMax() * power, -rightEngine
-						.getAbsoluteMax()
-						* power);
+				float power = getNormY(y) / getMaxY();
+				setEngSpd(-leftEngine.getAbsoluteMax() * power, -rightEngine.getAbsoluteMax() * power);
 			} else {
 				moving = MovementType.IDLE;
 				setEngSpd(0f, 0f);
@@ -135,18 +155,14 @@ public class BbotControl extends Activity implements SensorEventListener {
 
 	@Override
 	public void onSensorChanged(SensorEvent event) {
-		float x = Math.abs(event.values[1]) > X_CEILING ? Math
-				.signum(event.values[1])
-				* X_CEILING : event.values[1];
-		// we should invert y to get standard cartesian coord system
-		float y = Math.abs(event.values[0]) > Y_CEILING ? -Math
-				.signum(event.values[0])
-				* Y_CEILING : -event.values[0];
+		float x = Math.abs(event.values[1]) > xCeiling ? Math.signum(event.values[1]) * xCeiling : event.values[1];
+		// invert y to get standard cartesian coord system
+		float y = Math.abs(event.values[0]) > yCeiling ? -Math.signum(event.values[0]) * yCeiling : -event.values[0];
 		updateEngines(x, y);
 		console.setText(new SensorEventDigest(event).toString());
-		console.append("L: " + leftEngine.getValue()+"\n");
-		console.append("R: " + rightEngine.getValue()+"\n");
-		console.append("moving: " + moving);
+		console.append("L: " + leftEngine.getValue() + "\n");
+		console.append("R: " + rightEngine.getValue() + "\n");
+		console.append("mode: " + moving);
 		leftEngine.invalidate();
 		rightEngine.invalidate();
 	}
@@ -154,35 +170,42 @@ public class BbotControl extends Activity implements SensorEventListener {
 	@Override
 	public void onAccuracyChanged(Sensor sensor, int i) {
 	}
-	
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-	    MenuInflater inflater = getMenuInflater();
-	    inflater.inflate(R.menu.menu, menu);
-	    return true;
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.menu, menu);
+		return true;
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-	    switch (item.getItemId()) {
-	    case R.id.settings:	    	
-	        startActivityForResult(new Intent(this, BbotSettings.class), 0);
-	        return true;	    
-	    default:
-	        return super.onOptionsItemSelected(item);
-	    }
+		switch (item.getItemId()) {
+		case R.id.settings:
+			startActivityForResult(new Intent(this, BbotSettings.class), 0);
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
-		
-	enum MovementType
-	{
-		FORWARD,
-		FORWARD_LEFT,
-		FORWARD_RIGHT,		
-		IDLE,
-		ROTATE_LEFT,
-		ROTATE_RIGHT,
-		BACKWARD,
-		BACKWARD_LEFT,
-		BACKWARD_RIGHT
+
+	private float getMaxX() {
+		return xCeiling - xFloor;
+	}
+
+	private float getMaxY() {
+		return yCeiling - yFloor;
+	}
+
+	private float getNormX(float x) {
+		return Math.abs(x) - xFloor;
+	}
+
+	private float getNormY(float y) {
+		return Math.abs(y) - yFloor;
+	}
+
+	enum MovementType {
+		FORWARD, FORWARD_LEFT, FORWARD_RIGHT, IDLE, ROTATE_LEFT, ROTATE_RIGHT, BACKWARD, BACKWARD_LEFT, BACKWARD_RIGHT
 	}
 }
