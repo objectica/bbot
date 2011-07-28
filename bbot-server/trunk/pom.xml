@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.objectica.bbot</groupId>
+    <artifactId>bbot-server</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>war</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.wicket</groupId>
+            <artifactId>wicket-core</artifactId>
+            <version>1.5-RC5.1</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.objectica.engine</groupId>
+            <artifactId>web</artifactId>
+            <type>war</type>
+            <scope>provided</scope>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <filtering>false</filtering>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**</include>
+                </includes>
+                <excludes>
+                    <exclude>**/*.java</exclude>
+                </excludes>
+            </resource>
+        </resources>
+
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.cargo</groupId>
+                <artifactId>cargo-maven2-plugin</artifactId>
+                <configuration>
+                    <!-- Container configuration -->
+                    <container>
+                        <containerId>jetty6x</containerId>
+                        <type>embedded</type>
+                    </container>
+                    <!-- Configuration to use with the container or the deployer -->
+                    <configuration>
+                        <deployables>
+                            <deployable>
+                                <groupId>com.objectica.engine</groupId>
+                                <artifactId>web</artifactId>
+                                <properties>
+                                    <context>/control</context>
+                                </properties>
+                            </deployable>
+                            <deployable>
+                                <groupId>${project.groupId}</groupId>
+                                <artifactId>${project.artifactId}</artifactId>
+                                <properties>
+                                    <context>/</context>
+                                </properties>
+                            </deployable>
+                        </deployables>
+                    </configuration>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.1</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                    <optimize>true</optimize>
+                    <debug>true</debug>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <distributionManagement>
+        <repository>
+            <id>es-internal</id>
+            <url>http://maven.eternity-solutions.com/repository/internal</url>
+        </repository>
+        <snapshotRepository>
+            <id>es-snapshots</id>
+            <url>http://maven.eternity-solutions.com/repository/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>es-internal</id>
+            <url>http://maven.eternity-solutions.com/repository/internal/</url>
+        </repository>
+        <repository>
+            <id>es-snapshots</id>
+            <url>http://maven.eternity-solutions.com/repository/snapshots/</url>
+        </repository>
+    </repositories>
+</project>
+

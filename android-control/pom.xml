@@ -5,7 +5,7 @@
     <groupId>com.objectica.bbot</groupId>
     <artifactId>android-client</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
+    <packaging>apk</packaging>
     <name>BBot Android Client</name>
 
     <properties>
