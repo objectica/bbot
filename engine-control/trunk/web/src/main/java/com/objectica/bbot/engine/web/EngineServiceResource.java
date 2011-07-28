@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import java.io.IOException;
@@ -16,19 +17,36 @@ import java.io.IOException;
 public class EngineServiceResource
 {
     private static final Logger logger = LoggerFactory.getLogger(EngineServiceResource.class);
-    private static final EngineController engineController;
+    private static EngineController engineController;
 
-    static
+    @POST
+    public String configure(@QueryParam("portName") String portName, @QueryParam("connectTimeout") int connectionTimeout, @QueryParam("testMode") boolean testMode)
     {
-        engineController = EngineFactory.createEngineController();
+        logger.info("Received Configure command. PortName: {}, Timeout: {}, testMode: {}", new Object[]{portName, connectionTimeout, testMode});
+        synchronized (this)
+        {
+            try
+            {
+                engineController = EngineFactory.createEngineController(portName, connectionTimeout, testMode);
+            } catch (Exception e)
+            {
+                logger.error("Error in configure", e);
+                return e.getMessage();
+            }
+        }
+        return null;
     }
 
     @GET
-    public String getGreeting(@QueryParam("engine") int engine, @QueryParam("command") int command, @QueryParam("speed") int speed) throws IOException, EngineConnectionException
+    public String sendCommand(@QueryParam("engine") int engine, @QueryParam("command") int command, @QueryParam("speed") int speed) throws IOException, EngineConnectionException
     {
         logger.info("Received ENGINE:{} COMMAND:{} VALUE:{}", new Object[]{engine, command, speed});
-        synchronized (engineController)
+        synchronized (this)
         {
+            if (engineController == null)
+            {
+                engineController = EngineFactory.createEngineController();
+            }
             engineController.sendCommand(engine, ControllerCommand.fromValue((byte) command), (byte) speed);
         }
         return "Hi there";

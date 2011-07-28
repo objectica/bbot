@@ -14,6 +14,7 @@ public class WicketApplication extends WebApplication
     protected void init()
     {
         super.init();
+        getMarkupSettings().setAutomaticLinking(true);
         mountPage("/dashboard", DashboardPage.class);
     }
 

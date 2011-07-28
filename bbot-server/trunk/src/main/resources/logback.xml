@@ -7,8 +7,8 @@
     </appender>
 
     <logger name="org.mortbay.log" level="WARN"/>
-    <!--<logger name="com.objectica.bbot.rumblepad" level="INFO"/>-->
-    <!--<logger name="com.objectica.bbot.engine.service.impl.RxTxDeviceHandler" level="WARN"/>-->
+    <logger name="com.objectica.bbot.rumblepad" level="INFO"/>
+    <logger name="com.objectica.bbot.engine.service.impl.RxTxDeviceHandler" level="WARN"/>
 
     <root level="debug">
         <appender-ref ref="STDOUT"/>
